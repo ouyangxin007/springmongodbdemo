@@ -3,14 +3,22 @@ package cn.com.taiji.mongoweb.daoimpl;
 
 import cn.com.taiji.mongoweb.dao.UserDao;
 import cn.com.taiji.mongoweb.model.User;
+import com.mongodb.AggregationOptions;
+import com.mongodb.BasicDBObject;
+import com.mongodb.Cursor;
+import com.mongodb.DBObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.geo.Point;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -38,8 +46,8 @@ public class UserDaoImpl implements UserDao {
 	 */
 	@Override
 	public User getUser(Integer id) {
-		
-		
+
+		// mongoTemplate.geoNear()
 		
 		return mongoTemplate.findOne(new Query(Criteria.where("id").is(id)), User.class);
 	}
@@ -98,5 +106,46 @@ public class UserDaoImpl implements UserDao {
 	public void insertAll(List<User> users) {
 		mongoTemplate.insertAll(users);
 	}
+
+
+	@Override
+	public List<DBObject> geoNear(String collection, DBObject query, Point point, int limit, long maxDistance) {
+		if(query==null)
+			query = new BasicDBObject();
+
+		List<DBObject> pipeLine = new ArrayList<>();
+		BasicDBObject aggregate = new BasicDBObject("$geoNear",
+				new BasicDBObject("near",new BasicDBObject("type","Point").append("coordinates",new double[]{point.getX(), point.getY()}))
+						.append("distanceField","dist.calculated")
+						.append("query", new BasicDBObject())
+						.append("num", 5)
+						.append("maxDistance", maxDistance)
+						.append("spherical",true)
+		);
+		pipeLine.add(aggregate);
+		Cursor cursor=mongoTemplate.getCollection(collection).aggregate(pipeLine, AggregationOptions.builder().build());
+		List<DBObject> list = new LinkedList<>();
+		while (cursor.hasNext()) {
+			list.add(cursor.next());
+		}
+		return list;
+	}
+
+	@Override
+	public List<DBObject> withinPolygon(String collection, String locationField,
+										List<double[]> polygon, DBObject fields, DBObject query, int limit) {
+		if(query==null)
+			query = new BasicDBObject();
+
+		List<List<double[]>> polygons = new LinkedList<>();
+		polygons.add(polygon);
+		query.put(locationField, new BasicDBObject("$geoWithin",
+				new BasicDBObject("$geometry",
+						new BasicDBObject("type","Polygon")
+								.append("coordinates",polygons))));
+		System.out.println("withinPolygon:{}"+query.toString());
+		return mongoTemplate.getCollection(collection).find(query, fields).limit(limit).toArray();
+	}
+
 
 }
