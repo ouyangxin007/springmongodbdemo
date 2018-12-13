@@ -84,25 +84,31 @@ public class UserController {
 //		point.setLng(118.783799);
 //		point.setLat(31.979234);
 		int limit = 5;
-		Long maxDistance = 5000L; // 米
+		Long maxDistance = 500000L; // 米
 		List<DBObject> list = userService.geo("point.test", query, point, limit, maxDistance);
 		for(DBObject obj : list)
 			System.out.println(obj);
 		return list;
 	}
 
-	@RequestMapping("/geo")
+	/*@RequestMapping("/geo")
 	public List<DBObject> geo(){
 		DBObject query = new BasicDBObject();
 		Point point = new Point(118.783799,31.979234);
 //		point.setLng(118.783799);
 //		point.setLat(31.979234);
 		int limit = 5;
+		List<double[]> list = new ArrayList<>();
+		list.add(new double[]{118.783799,31.979234});
+		list.add(new double[]{118.783799,31.979234});
+		list.add(new double[]{118.783799,31.979234});
+		list.add(new double[]{118.783799,31.979234});
 		Long maxDistance = 5000L; // 米
-		List<DBObject> list = userService.withinPolygon("point.test", query, point, limit, maxDistance);
-		for(DBObject obj : list)
+		List<DBObject> listfinal = userService.withinPolygon("point.test", String locationField,
+				list, DBObject fields, query, 5);//("point.test", query, point, limit, maxDistance);
+		for(DBObject obj : listfinal)
 			System.out.println(obj);
-		return list;
-	}
+		return listfinal;
+	}*/
 
 }
