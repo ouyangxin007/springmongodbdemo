@@ -84,7 +84,7 @@ public class UserController {
 //		point.setLng(118.783799);
 //		point.setLat(31.979234);
 		int limit = 5;
-		Long maxDistance = 500000L; // 米
+		Long maxDistance = 5000L; // 米
 		List<DBObject> list = userService.geo("point.test", query, point, limit, maxDistance);
 		for(DBObject obj : list)
 			System.out.println(obj);
