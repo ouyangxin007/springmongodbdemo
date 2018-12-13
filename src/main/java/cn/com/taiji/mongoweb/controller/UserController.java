@@ -91,24 +91,22 @@ public class UserController {
 		return list;
 	}
 
-	/*@RequestMapping("/geo")
-	public List<DBObject> geo(){
+	@RequestMapping("/withinPolygon")
+	public List<DBObject> withinPolygon(){
 		DBObject query = new BasicDBObject();
-		Point point = new Point(118.783799,31.979234);
-//		point.setLng(118.783799);
-//		point.setLat(31.979234);
-		int limit = 5;
+		DBObject field = new BasicDBObject();
+		int limit = 3;//
 		List<double[]> list = new ArrayList<>();
-		list.add(new double[]{118.783799,31.979234});
-		list.add(new double[]{118.783799,31.979234});
-		list.add(new double[]{118.783799,31.979234});
-		list.add(new double[]{118.783799,31.979234});
-		Long maxDistance = 5000L; // 米
-		List<DBObject> listfinal = userService.withinPolygon("point.test", String locationField,
-				list, DBObject fields, query, 5);//("point.test", query, point, limit, maxDistance);
+		list.add(new double[]{110,40});
+		list.add(new double[]{110,0});
+		list.add(new double[]{120,0});
+		list.add(new double[]{120,40});
+		list.add(new double[]{110,40});
+		List<DBObject> listfinal = userService.withinPolygon("point.test",  "loc",
+				list,  field, query, limit);
 		for(DBObject obj : listfinal)
 			System.out.println(obj);
 		return listfinal;
-	}*/
+	}
 
 }
