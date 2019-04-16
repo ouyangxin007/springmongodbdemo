@@ -5,6 +5,7 @@ import cn.com.taiji.mongoweb.dao.UserDao;
 import cn.com.taiji.mongoweb.model.User;
 import cn.com.taiji.mongoweb.service.UserService;
 import com.mongodb.DBObject;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
@@ -55,13 +56,13 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public List<DBObject> geo(String collection, DBObject query, Point point, int limit, long maxDistance) {
+	public List<Document> geo(String collection, DBObject query, com.mongodb.client.model.geojson.Point point, int limit, long maxDistance) {
 		 return userDao.geoNear( collection,  query,  point,  limit,  maxDistance);
 	}
 
 	@Override
-	public List<DBObject> withinPolygon(String collection, String locationField,
-								 List<double[]> polygon, DBObject fields, DBObject query, int limit){
+	public List<Document> withinPolygon(String collection, String locationField,
+										List<List<Double>> polygon, DBObject fields, DBObject query, int limit){
 		return userDao.withinPolygon( collection,  locationField,
 				 polygon,  fields,  query,  limit);
 	}

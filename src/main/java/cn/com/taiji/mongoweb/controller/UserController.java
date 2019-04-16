@@ -7,6 +7,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 
+import com.mongodb.client.model.geojson.Position;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -78,33 +80,48 @@ public class UserController {
 	}
 
 	@RequestMapping("/geo")
-	public List<DBObject> geo(){
+	public List<Document> geo(){
 		DBObject query = new BasicDBObject();
-		Point point = new Point(118.783799,31.979234);
-//		point.setLng(118.783799);
-//		point.setLat(31.979234);
+		Position Position = new Position((double)0,(double)0);
+		com.mongodb.client.model.geojson.Point point = new com.mongodb.client.model.geojson.Point(Position);
 		int limit = 5;
 		Long maxDistance = 5000L; // 米
-		List<DBObject> list = userService.geo("point.test", query, point, limit, maxDistance);
-		for(DBObject obj : list)
+		List<Document> list = userService.geo("location", query, point, limit, maxDistance);
+		for(Document obj : list)
 			System.out.println(obj);
 		return list;
 	}
 
 	@RequestMapping("/withinPolygon")
-	public List<DBObject> withinPolygon(){
+	public List<Document> withinPolygon(){
 		DBObject query = new BasicDBObject();
 		DBObject field = new BasicDBObject();
 		int limit = 3;//
-		List<double[]> list = new ArrayList<>();
-		list.add(new double[]{110,40});
-		list.add(new double[]{110,0});
-		list.add(new double[]{120,0});
-		list.add(new double[]{120,40});
-		list.add(new double[]{110,40});
-		List<DBObject> listfinal = userService.withinPolygon("point.test",  "loc",
-				list,  field, query, limit);
-		for(DBObject obj : listfinal)
+		List<List<Double>> listDouble = new ArrayList<>(5);
+		List<Double> p1 = new ArrayList<>();
+		List<Double> p2 = new ArrayList<>();
+		List<Double> p3 = new ArrayList<>();
+		List<Double> p4 = new ArrayList<>();
+		List<Double> p5 = new ArrayList<>();
+		p1.add(0d);
+		p1.add(0d);
+		p2.add(0d);
+		p2.add(30d);
+		p3.add(30d);
+		p3.add(30d);
+		p4.add(30d);
+		p4.add(0d);
+		p5.add(0d);
+		p5.add(0d);
+		listDouble.add(p1);
+		listDouble.add(p2);
+		listDouble.add(p3);
+		listDouble.add(p4);
+		listDouble.add(p5);
+
+		List<Document> listfinal = userService.withinPolygon("location",  "loc",
+				listDouble,  field, query, limit);
+		for(Document obj : listfinal)
 			System.out.println(obj);
 		return listfinal;
 	}

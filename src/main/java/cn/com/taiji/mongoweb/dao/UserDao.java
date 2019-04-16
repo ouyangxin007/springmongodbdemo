@@ -2,6 +2,7 @@ package cn.com.taiji.mongoweb.dao;
 
 import cn.com.taiji.mongoweb.model.User;
 import com.mongodb.DBObject;
+import org.bson.Document;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.geo.Point;
 
@@ -27,10 +28,10 @@ public interface UserDao {
 
 	List<User> findByPage(User user, Pageable pageable);
 
-	List<DBObject> geoNear(String collection, DBObject query, Point point, int limit, long maxDistance);
+	List<Document> geoNear(String collection, DBObject query, com.mongodb.client.model.geojson.Point point, int limit, long maxDistance);
 
-	List<DBObject> withinPolygon(String collection, String locationField,
-										List<double[]> polygon, DBObject fields, DBObject query, int limit);
+	List<Document> withinPolygon(String collection, String locationField,
+								 List<List<Double>> polygon, DBObject fields, DBObject query, int limit);
 
 
 	}

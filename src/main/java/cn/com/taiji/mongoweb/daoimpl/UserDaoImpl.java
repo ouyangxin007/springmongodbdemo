@@ -7,6 +7,12 @@ import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
 import com.mongodb.Cursor;
 import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.geojson.Position;
+import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
@@ -17,9 +23,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import org.springframework.data.geo.Point;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+
+import java.util.*;
 
 /**
  *
@@ -38,6 +43,7 @@ public class UserDaoImpl implements UserDao {
 	 */
 	@Override
 	public List<User> findAll() {
+
 		return mongoTemplate.findAll(User.class);
 	}
 
@@ -109,42 +115,47 @@ public class UserDaoImpl implements UserDao {
 
 
 	@Override
-	public List<DBObject> geoNear(String collection, DBObject query, Point point, int limit, long maxDistance) {
+	public List<Document> geoNear(String collection, DBObject query, com.mongodb.client.model.geojson.Point point, int limit, long maxDistance) {
 		if(query==null)
 			query = new BasicDBObject();
 
-		List<DBObject> pipeLine = new ArrayList<>();
-		BasicDBObject aggregate = new BasicDBObject("$geoNear",
-				new BasicDBObject("near",new BasicDBObject("type","Point").append("coordinates",new double[]{point.getX(), point.getY()}))
-						.append("distanceField","dist.calculated")
-						.append("query", new BasicDBObject())
-						.append("num", 5)
-						.append("maxDistance", maxDistance)
-						.append("spherical",true)
-		);
-		pipeLine.add(aggregate);
-		Cursor cursor=mongoTemplate.getCollection(collection).aggregate(pipeLine, AggregationOptions.builder().build());
-		List<DBObject> list = new LinkedList<>();
-		while (cursor.hasNext()) {
-			list.add(cursor.next());
-		}
-		return list;
+		System.out.println("withinPolygon:{}"+query.toString());
+		//Bson bson = Filters.geoWithinCenter("loc",0d,0d,(double)40);
+		//Bson bsonCenterSphere = Filters.geoWithinCenterSphere("loc", 110.29239, 30.2323, 120 / 6371000); // 120米除以6371000转换成弧度
+		//Bson bsonCenter = Filters.geoWithinCenter("loc", 110.29239, 30.2323, 120 / 6371000); // 120米除以6371000转换成弧度
+		//FindIterable findIterable = mongoTemplate.getCollection("test").find(bson);
+		List<Document> result = new ArrayList<Document>();
+		//MongoCursor<Document> mongoCursor = mongoTemplate.getCollection(collection).find(bson).limit(limit).iterator();
+
+		//MongoCursor<Document> mongoCursor1 = findIterable.iterator();
+		//while(mongoCursor.hasNext()){
+		//	result.add(mongoCursor.next());
+		//}
+		return result;
 	}
 
 	@Override
-	public List<DBObject> withinPolygon(String collection, String locationField,
-										List<double[]> polygon, DBObject fields, DBObject query, int limit) {
+	public List<Document> withinPolygon(String collection, String locationField,
+										List<List<Double>> polygon, DBObject fields, DBObject query, int limit) {
 		if(query==null)
 			query = new BasicDBObject();
 
-		List<List<double[]>> polygons = new LinkedList<>();
-		polygons.add(polygon);
-		query.put(locationField, new BasicDBObject("$geoWithin",
-				new BasicDBObject("$geometry",
-						new BasicDBObject("type","Polygon")
-								.append("coordinates",polygons))));
 		System.out.println("withinPolygon:{}"+query.toString());
-		return mongoTemplate.getCollection(collection).find(query, fields).limit(limit).toArray();
+		Bson bson = Filters.and(Arrays.asList(
+				Filters.geoWithinPolygon(locationField, polygon)
+				/*Filters.gte("apis.count", 1)*/));
+		//Bson bsonCenterSphere = Filters.geoWithinCenterSphere("loc", 110.29239, 30.2323, 120 / 6371000); // 120米除以6371000转换成弧度
+		//Bson bsonCenter = Filters.geoWithinCenter("loc", 110.29239, 30.2323, 120 / 6371000); // 120米除以6371000转换成弧度
+		FindIterable findIterable = mongoTemplate.getCollection("test").find(bson);
+		List<Document> result = new ArrayList<Document>();
+		MongoCursor<Document> mongoCursor = mongoTemplate.getCollection(collection).find(bson).limit(limit).iterator();
+
+		MongoCursor<Document> mongoCursor1 = findIterable.iterator();
+		while(mongoCursor.hasNext()){
+			result.add(mongoCursor.next());
+		}
+		return result;
+
 	}
 
 
