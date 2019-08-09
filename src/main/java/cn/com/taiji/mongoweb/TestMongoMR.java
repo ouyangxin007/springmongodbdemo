@@ -59,9 +59,20 @@ public class TestMongoMR {
                     book.put("pages", 150);
                     books.insert(book);
 
-                    String map = "";
+                    String map = "function() { "+
+                            "var category; " +
+                            "if ( this.pages >= 250 ) "+
+                            "category = 'Big Books'; " +
+                            "else " +
+                            "category = 'Small Books'; "+
+                            "emit(category, {name: this.name});}";
 
-                    String reduce = "";
+                    String reduce = "function(key, values) { " +
+                            "var sum = 0; " +
+                            "values.forEach(function() { " +
+                            "sum += 1; "+
+                            "}); " +
+                            "return {books: sum};} ";
 
                     MapReduceCommand cmd = new MapReduceCommand(books, map, reduce,
                             null, MapReduceCommand.OutputType.INLINE, null);
