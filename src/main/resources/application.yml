@@ -13,4 +13,4 @@ logging:
       springframework:
         data:
           mongodb:
-            core: DEBUG
+            core: ERROR

@@ -86,7 +86,7 @@ public class UserController {
 		com.mongodb.client.model.geojson.Point point = new com.mongodb.client.model.geojson.Point(Position);
 		int limit = 5;
 		Long maxDistance = 5000L; // 米
-		List<Document> list = userService.geo("location", query, point, limit, maxDistance);
+		List<Document> list = userService.geo("people", query, point, limit, maxDistance);
 		for(Document obj : list)
 			System.out.println(obj);
 		return list;
@@ -96,7 +96,7 @@ public class UserController {
 	public List<Document> withinPolygon(){
 		DBObject query = new BasicDBObject();
 		DBObject field = new BasicDBObject();
-		int limit = 3;//
+		int limit = 100;
 		List<List<Double>> listDouble = new ArrayList<>(5);
 		List<Double> p1 = new ArrayList<>();
 		List<Double> p2 = new ArrayList<>();
@@ -119,7 +119,7 @@ public class UserController {
 		listDouble.add(p4);
 		listDouble.add(p5);
 
-		List<Document> listfinal = userService.withinPolygon("location",  "loc",
+		List<Document> listfinal = userService.withinPolygon("people",  "gps",
 				listDouble,  field, query, limit);
 		for(Document obj : listfinal)
 			System.out.println(obj);
